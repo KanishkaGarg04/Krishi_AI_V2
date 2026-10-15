@@ -6,11 +6,14 @@
  * maintaining full compatibility with the existing Flask backend endpoints.
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const API_BASE_URL =
+  typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL
+    ? import.meta.env.VITE_API_URL
+    : "http://localhost:5000";
 
 export const apiClient = {
   async get(endpoint) {
-    const token = localStorage.getItem("krishi_token");
+    const token = typeof localStorage !== "undefined" ? localStorage.getItem("krishi_token") : null;
     const headers = {
       "Content-Type": "application/json"
     };
@@ -46,7 +49,7 @@ export const apiClient = {
   },
 
   async post(endpoint, payload) {
-    const token = localStorage.getItem("krishi_token");
+    const token = typeof localStorage !== "undefined" ? localStorage.getItem("krishi_token") : null;
     const headers = {
       "Content-Type": "application/json"
     };

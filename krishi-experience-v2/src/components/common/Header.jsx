@@ -1,10 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Sprout, LogIn, CheckCircle2, AlertCircle, RefreshCw, Sparkles } from "lucide-react";
+import {
+  Sprout,
+  LogIn,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  Sparkles,
+  Calendar,
+  TrendingUp,
+  LayoutDashboard,
+  ShieldAlert,
+  Droplets,
+  Store,
+  Menu,
+  X,
+  User
+} from "lucide-react";
 import { authService } from "../../services/authService";
 
-export function Header({ onOpenLogin, onLoadDemo, onResetDraft }) {
+export function Header({
+  activeView,
+  onNavigate,
+  onOpenLogin,
+  onLoadDemo,
+  onResetDraft,
+  activeCrop,
+  currentFarmerName
+}) {
   const [backendStatus, setBackendStatus] = useState({ checking: true, isOnline: false });
   const [currentUser, setCurrentUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -19,70 +44,81 @@ export function Header({ onOpenLogin, onLoadDemo, onResetDraft }) {
     return () => { isMounted = false; };
   }, []);
 
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "lifecycle", label: "Crop Calendar", icon: Calendar },
+    { id: "market", label: "Mandi Prices", icon: TrendingUp },
+    { id: "disease", label: "Disease AI", icon: ShieldAlert },
+    { id: "irrigation", label: "Smart Irrigation", icon: Droplets },
+    { id: "marketplace", label: "Marketplace", icon: Store }
+  ];
+
+  const handleNavClick = (id) => {
+    onNavigate(id);
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <header className="border-b border-brand-border bg-brand-surface sticky top-0 z-30 shadow-soft">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo & V2 Badge */}
+    <header className="border-b border-brand-border bg-brand-surface sticky top-0 z-40 shadow-soft">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Left: Brand Logo & V2 Badge */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-green flex items-center justify-center text-brand-mint shadow-sm">
-            <Sprout className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold font-sans tracking-tight text-brand-green">
-                Krishi AI
-              </span>
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-brand-mint text-brand-green border border-brand-leaf/30">
-                V2 Experience
-              </span>
+          <div
+            onClick={() => onNavigate("dashboard")}
+            className="flex items-center space-x-2.5 cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-xl bg-brand-green flex items-center justify-center text-brand-mint shadow-sm">
+              <Sprout className="w-6 h-6" />
             </div>
-            <p className="text-xs text-stone-500 hidden sm:block">
-              Farmer-First Agricultural Platform &bull; Phase 1 Onboarding
-            </p>
+            <div>
+              <div className="flex items-center space-x-1.5">
+                <span className="text-xl font-bold font-sans tracking-tight text-brand-green">
+                  Krishi AI
+                </span>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-brand-mint text-brand-green border border-brand-leaf/30">
+                  V2
+                </span>
+              </div>
+              <p className="text-[10px] text-stone-400 hidden sm:block -mt-0.5">
+                Farmer-First Intelligence
+              </p>
+            </div>
           </div>
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden lg:flex items-center space-x-1 ml-6 pl-6 border-l border-brand-border">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleNavClick(item.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                    isActive
+                      ? "bg-brand-mint text-brand-green shadow-xs"
+                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Status & Actions */}
+        {/* Right Actions */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Backend Connectivity Status Pill */}
-          <div
-            title={
-              backendStatus.isOnline
-                ? "Backend API (Flask:5000) is online and connected"
-                : "Backend is currently offline or unreachable. Development Mock mode is active."
-            }
-            className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-              backendStatus.checking
-                ? "bg-stone-100 text-stone-600 border-stone-200"
-                : backendStatus.isOnline
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                : "bg-amber-50 text-amber-800 border-amber-200"
-            }`}
-          >
-            {backendStatus.checking ? (
-              <RefreshCw className="w-3 h-3 animate-spin text-stone-500" />
-            ) : backendStatus.isOnline ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            ) : (
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-            )}
-            <span>
-              {backendStatus.checking
-                ? "Checking API..."
-                : backendStatus.isOnline
-                ? "Backend Connected"
-                : "Dev Fixture Mode"}
-            </span>
-          </div>
-
-          {/* Quick Demo Prefill Dropdown for Evaluators */}
-          <div className="hidden lg:flex items-center space-x-1 bg-brand-sand px-2 py-1 rounded-lg border border-brand-border text-xs text-stone-600">
+          {/* Quick Demo Selector for Evaluators */}
+          <div className="hidden xl:flex items-center space-x-1 bg-brand-sand px-2 py-1 rounded-lg border border-brand-border text-xs text-stone-600">
             <Sparkles className="w-3.5 h-3.5 text-brand-amber" />
-            <span className="font-medium mr-1">Demo Autofill:</span>
+            <span className="font-semibold text-stone-500 mr-1">Demo:</span>
             <button
               type="button"
               onClick={() => onLoadDemo("activeWheatFarmer")}
-              className="text-brand-green hover:underline font-medium hover:text-brand-emerald"
+              className="text-brand-green hover:underline font-bold"
             >
               Active Wheat
             </button>
@@ -90,41 +126,77 @@ export function Header({ onOpenLogin, onLoadDemo, onResetDraft }) {
             <button
               type="button"
               onClick={() => onLoadDemo("planningCottonFarmer")}
-              className="text-brand-green hover:underline font-medium hover:text-brand-emerald"
+              className="text-brand-green hover:underline font-bold"
             >
               Planning Cotton
             </button>
           </div>
 
-          {/* Returning User Login Button */}
-          {currentUser ? (
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-medium text-brand-green bg-brand-mint/40 px-3 py-1.5 rounded-lg border border-brand-leaf/20">
-                Farmer: {currentUser.username || currentUser.email}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  authService.logout();
-                  setCurrentUser(null);
-                }}
-                className="text-xs text-stone-500 hover:text-stone-800 underline"
-              >
-                Sign out
-              </button>
+          {/* Onboarding Flow Shortcut */}
+          <button
+            type="button"
+            onClick={() => onNavigate("onboarding")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              activeView === "onboarding"
+                ? "bg-brand-green text-white border-brand-green"
+                : "bg-white text-stone-600 border-brand-border hover:bg-stone-50"
+            }`}
+          >
+            Onboarding Flow
+          </button>
+
+          {/* User Badge / Login */}
+          {currentFarmerName ? (
+            <div className="hidden sm:flex items-center space-x-2 bg-brand-mint/40 px-3 py-1.5 rounded-xl border border-brand-leaf/30 text-xs font-bold text-brand-green">
+              <User className="w-3.5 h-3.5 text-brand-leaf" />
+              <span className="truncate max-w-[120px]">{currentFarmerName}</span>
             </div>
           ) : (
             <button
               type="button"
               onClick={onOpenLogin}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-brand-green bg-white hover:bg-brand-mint/20 border border-brand-green/20 transition-all shadow-sm"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-bold text-brand-green bg-white hover:bg-stone-50 border border-brand-border shadow-xs"
             >
-              <LogIn className="w-4 h-4 text-brand-green" />
-              <span>Farmer Login</span>
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Login</span>
             </button>
           )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl text-stone-600 hover:bg-stone-100"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-brand-surface border-b border-brand-border px-4 py-4 space-y-2 shadow-lg animate-fade-in">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNavClick(item.id)}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-2.5 ${
+                  isActive
+                    ? "bg-brand-mint text-brand-green shadow-xs"
+                    : "text-stone-700 hover:bg-stone-100"
+                }`}
+              >
+                <Icon className="w-4 h-4 text-brand-green" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
